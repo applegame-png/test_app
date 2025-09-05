@@ -7,8 +7,6 @@ from datetime import date
 from io import StringIO
 import os
 import plotly.express as px
-import matplotlib.pyplot as plt
-import japanize_matplotlib
 
 # -------------------------
 # 基本設定
