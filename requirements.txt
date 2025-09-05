@@ -1,6 +1,1 @@
-streamlit
-pandas
-altair
 plotly
-matplotlib
-japanize-matplotlib
