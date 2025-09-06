@@ -7,11 +7,13 @@ from datetime import date
 from io import StringIO
 import os
 import plotly.express as px
+import matplotlib.pyplot as plt
+import japanize_matplotlib
 
 # -------------------------
 # 基本設定
 # -------------------------
-st.set_page_config(page_title="對戰記錄應用", page_icon="💰", layout="wide")
+st.set_page_config(page_title="對戰記錄應用", page_icon="🎮", layout="wide")
 
 DATA_FILE = "shadowverse_results.csv"
 DEFAULT_CATEGORIES = ["復仇者", "主教", "龍族", "夜魔", "巫師", "皇家", "妖精"]
@@ -177,7 +179,7 @@ with st.sidebar:
 # -------------------------
 # 主畫面：輸入表單
 # -------------------------
-st.title("對戰記錄應用 💸")
+st.title("對戰記錄應用 🎮")
 with st.container():
     st.subheader("📥 新增記錄")
     with st.form("add_form", clear_on_submit=True):
@@ -366,9 +368,12 @@ show_df = show_df[["日期","對戰類型","對手牌型","備註","結果"]].so
 st.dataframe(show_df, use_container_width=True, hide_index=True)
 
 # -------------------------
-# CSV 匯入/匯出（欄位固定：日期, 對戰類型, 對手牌型, 備註, 結果, 金額）
+# CSV 匯入/匯出（欄位固定：日期, 對戰類型, 對手牌型, 備註, 結果）
 # -------------------------
 st.subheader("📄 CSV 匯入/匯出")
+
+# 固定欄位（已移除「金額」）
+COLS = ["日期", "對戰類型", "對手牌型", "備註", "結果"]
 
 c_up, c_down = st.columns(2)
 
@@ -377,10 +382,9 @@ def _normalize_df(_df: pd.DataFrame) -> pd.DataFrame:
     # 若缺必填欄位則補齊
     for c in COLS:
         if c not in _df.columns:
-            _df[c] = 0.0 if c == "金額" else ""
+            _df[c] = ""
     # 型別整理
     _df["日期"] = pd.to_datetime(_df["日期"], errors="coerce").dt.date
-    _df["金額"] = pd.to_numeric(_df["金額"], errors="coerce").fillna(0.0)
     # 多餘欄位丟棄並固定順序
     return _df[COLS]
 
@@ -391,7 +395,7 @@ with c_up:
     dedup = st.checkbox("去除重複（鍵：日期, 對戰類型, 對手牌型, 備註, 結果）", value=True, key="csv_dedup")
 
     uploaded = st.file_uploader(
-        "選擇 CSV（必填欄位：日期, 對戰類型, 對手牌型, 備註, 結果, 金額）",
+        "選擇 CSV（必填欄位：日期, 對戰類型, 對手牌型, 備註, 結果）",
         type=["csv"],
         key="csv_uploader"
     )
@@ -410,7 +414,7 @@ with c_up:
             updf = pd.read_csv(StringIO(text))
             need = set(COLS)
             if not need.issubset(set(updf.columns)):
-                st.error("欄位名稱不足。必須：日期, 對戰類型, 對手牌型, 備註, 結果, 金額")
+                st.error("欄位名稱不足。必須：日期, 對戰類型, 對手牌型, 備註, 結果")
             else:
                 updf = _normalize_df(updf)
 
@@ -539,6 +543,3 @@ with c_down:
             use_container_width=True,
             key="btn_template"
         )
-
-
-
